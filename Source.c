@@ -18,7 +18,8 @@ int main() {
 	char  memory[MEMSIZE];
 	//*p = &memory[10];
 	memory_init(memory, MEMSIZE);
-	
+
+	memory_alloc(sizeof(int) * 4);
 	void** p;
 	p = memP;
 	test();
@@ -33,7 +34,16 @@ int main() {
 //}
 
 void* memory_alloc(unsigned int size) {
-
+	void** p = memP;
+	unsigned int buffSize;
+	while (1) {
+		buffSize = **(unsigned int**)p;
+		if ((buffSize >> 1) >= size && (buffSize & 1) == 0) {
+			p = *p;
+			*(unsigned int*)p = (size << 1) | 1;
+			printf("jo");
+		}
+	}
 }
 
 void memory_init(void* ptr, unsigned int size) {
@@ -41,6 +51,8 @@ void memory_init(void* ptr, unsigned int size) {
 	void** p = ptr;
 	*p = (void**)ptr + 1; // pointer to pointer ptr[sizeof(void*)]
 
+
+	//TODO zmenit buffsize na realnu velkost
 	p = p + 1;
 	unsigned int BuffSize = (size << 1); //velkost s bitom na urcenie zaplnenia
 	*(unsigned int*)p = BuffSize;
