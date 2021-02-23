@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MEMSIZE 50
+#define MEMSIZE 100
 
 //typedef struct _head {
 //	short size;
@@ -34,13 +34,42 @@ int main() {
 //}
 
 void* memory_alloc(unsigned int size) {
+	void** help = memP; //tmp
 	void** p = memP;
+	void** buff;
 	unsigned int buffSize;
 	while (1) {
 		buffSize = **(unsigned int**)p;
-		if ((buffSize >> 1) >= size && (buffSize & 1) == 0) {
+
+		if ((buffSize >> 1) > size && (buffSize & 1) == 0) {
+
 			p = *p;
-			*(unsigned int*)p = (size << 1) | 1;
+			*(unsigned int*)p = (size << 1) | 1; //size begin
+			p = (char*)p + sizeof(unsigned int); //skok na zaciatok payloadu
+			buff = p; //ukazuje na prev pointer -> buduci zaciatok payloadu
+			p = (char*)p + sizeof(char) * size; //skok na koniec payloadu
+			*(unsigned int*)p = (size << 1) | 1; //size end
+			
+			if (((buffSize >> 1) - size - 2*sizeof(unsigned int) )> (2*sizeof(void*) + 2*sizeof(unsigned int))) { //zmensena free bunka je dost velka
+				p = (char*)p + sizeof(unsigned int);
+				*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
+				
+				
+				if (*buff == NULL) { //prev == NULL
+					*memP = p; //. zaciatok ukazuje na nove pole
+					p = (char*)p + sizeof(unsigned int);
+					*p = NULL; //nove prev
+				}
+				else {
+					p = (char*)p + sizeof(unsigned int);
+					*p = buff;
+				}
+			}
+			else {
+
+			}
+			p = (char*)p + sizeof(char) * size;
+
 			printf("jo");
 		}
 	}
@@ -65,14 +94,14 @@ void memory_init(void* ptr, unsigned int size) {
 	
 	//next a last ptr su zatial NULL
 	p = (char*)ptr + sizeof(void*) + sizeof(unsigned int) ;
-	*p = NULL; //next
+	*p = NULL; //prev
 	p = p + 1;
-	*p = (void**)ptr; //last
+	*p = NULL; //next
 
 
 	//
-	/*p = ptr;
-	BuffSize = **(unsigned int**)p;*/
+	p = ptr;
+	BuffSize = **(unsigned int**)p;
 
 	memP = ptr;
 
