@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MEMSIZE 40
+#define MEMSIZE 50
 
 //typedef struct _head {
 //	short size;
@@ -54,7 +54,9 @@ void memory_init(void* ptr, unsigned int size) {
 
 	//TODO zmenit buffsize na realnu velkost
 	p = p + 1;
-	unsigned int BuffSize = (size << 1); //velkost s bitom na urcenie zaplnenia
+	unsigned int BuffSize = ((size - 3*sizeof(void*) - 2*sizeof(unsigned int) ) << 1); //velkost s bitom na urcenie zaplnenia
+
+	
 	*(unsigned int*)p = BuffSize;
 
 	p = (char*)ptr + sizeof(char) * (size - sizeof(unsigned int)); //poslednych sizeof(int) miest memory pola
@@ -63,19 +65,16 @@ void memory_init(void* ptr, unsigned int size) {
 	
 	//next a last ptr su zatial NULL
 	p = (char*)ptr + sizeof(void*) + sizeof(unsigned int) ;
-	*p = NULL;
+	*p = NULL; //next
 	p = p + 1;
-	*p = NULL;
-
-	p = ptr;
-	BuffSize = **(unsigned int**)p;
-
-	
+	*p = (void**)ptr; //last
 
 
+	//
+	/*p = ptr;
+	BuffSize = **(unsigned int**)p;*/
 
 	memP = ptr;
-	
 
 }
 
