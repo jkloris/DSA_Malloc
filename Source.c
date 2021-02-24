@@ -16,12 +16,13 @@ void test();
 int main() {
 
 	char  memory[MEMSIZE];
-	//*p = &memory[10];
 	memory_init(memory, MEMSIZE);
+	void** a, **b, *c;
+	a = memP;
+	c = memory_alloc(sizeof(int) * 4);
 
-	memory_alloc(sizeof(int) * 4);
-	void** p;
-	p = memP;
+	b = memory_alloc(sizeof(char) * 20);
+
 	test();
 	return 0;
 }
@@ -36,17 +37,21 @@ int main() {
 void* memory_alloc(unsigned int size) {
 	void** help = memP; //tmp
 	void** p = memP;
-	void** buff;
+	void** buff, *prev, * next;
 	unsigned int buffSize;
-	while (1) {
+
+	while (*p != NULL) {
 		buffSize = **(unsigned int**)p;
+
+		p = *p;
 
 		if ((buffSize >> 1) > size && (buffSize & 1) == 0) {
 
-			p = *p;
 			*(unsigned int*)p = (size << 1) | 1; //size begin
 			p = (char*)p + sizeof(unsigned int); //skok na zaciatok payloadu
-			buff = p; //ukazuje na prev pointer -> buduci zaciatok payloadu
+			buff = p;
+			prev = *p; //ukazuje na prev pointer -> buduci zaciatok payloadu
+			next = *(p + 1);
 			p = (char*)p + sizeof(char) * size; //skok na koniec payloadu
 			*(unsigned int*)p = (size << 1) | 1; //size end
 			
@@ -55,23 +60,42 @@ void* memory_alloc(unsigned int size) {
 				*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
 				
 				
-				if (*buff == NULL) { //prev == NULL
+				if (prev == NULL) { //prev == NULL
 					*memP = p; //. zaciatok ukazuje na nove pole
 					p = (char*)p + sizeof(unsigned int);
 					*p = NULL; //nove prev
 				}
 				else {
 					p = (char*)p + sizeof(unsigned int);
-					*p = buff;
+					*p = prev; //lepsie otestovat
 				}
+				p = p + 1; //mal by ukazovat na next novej free bunky
+
+				if (next != NULL) {
+					*p = NULL;
+				}
+				else {
+					*p = next;
+					p = (char*)p - sizeof(void*); // ukazuje na prev NewFree
+					buff = (char*)buff - sizeof(unsigned int);
+					*p = buff; //na adresu kde ukazuje p sa ulozila adresa kde ukazuje buff
+					
+				}
+				
+				//TODO vycistit pole
+				return buff = (char*)buff +  sizeof(unsigned int);
+				
 			}
 			else {
 
 			}
-			p = (char*)p + sizeof(char) * size;
+			
 
 			printf("jo");
 		}
+		
+		p = (char*)p + sizeof(void*) + sizeof(unsigned int);
+
 	}
 }
 
