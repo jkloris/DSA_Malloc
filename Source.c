@@ -8,20 +8,24 @@
 //}HEAD;
 
 void** memP;
-void show_memory();
+//void show_memory();
 void memory_init(void* ptr, unsigned int size);
 void* memory_alloc(unsigned int size);
+int memory_free(void* valid_ptr);
 
 void test();
 int main() {
 
 	char  memory[MEMSIZE];
 	memory_init(memory, MEMSIZE);
-	void** a, **b, *c;
+	void** a, *b, *c;
 	a = memP;
 	b = memory_alloc(sizeof(char) * 80);
 	c = memory_alloc(sizeof(int) * 4);
 
+	*(char*)b = 'a';
+	*(int*)b = 88;
+	memory_free(b);
 
 	test();
 	return 0;
@@ -33,6 +37,22 @@ int main() {
 //		else printf("%c\n", *(p + i));
 //	}
 //}
+
+int memory_free(void* valid_ptr) {
+	void** p = (char*)valid_ptr - sizeof(unsigned int);
+	unsigned int size = *(unsigned int*)p >> 1;
+	int i;
+	p = valid_ptr;
+	for (i = 0; i < size / sizeof(void*); i++) {
+		*p++ = NULL;
+	}
+	for (i = 0; i < size % sizeof(void*); i++) {
+		*(char*)p = NULL;
+		p = (char*)p + sizeof(char);
+	}
+
+}
+
 
 void* memory_alloc(unsigned int size) {
 	void** help = memP; //tmp
@@ -117,7 +137,7 @@ void* memory_alloc(unsigned int size) {
 				}
 			}
 			
-			return buff = (char*)buff +  sizeof(unsigned int);
+			return buff = (char*)buff;
 						
 			
 		}
@@ -135,7 +155,7 @@ void memory_init(void* ptr, unsigned int size) {
 	*p = (void**)ptr + 1; // pointer to pointer ptr[sizeof(void*)]
 
 
-	//TODO zmenit buffsize na realnu velkost
+	//TODO zmenit buffsize na realnu velkost - asi done? 
 	p = p + 1;
 	unsigned int BuffSize = ((size - sizeof(void*) - 2*sizeof(unsigned int) ) << 1); //velkost s bitom na urcenie zaplnenia
 
