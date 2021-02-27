@@ -56,11 +56,14 @@ void* memory_alloc(unsigned int size) {
 			p = (char*)p + sizeof(unsigned int); //skok na zaciatok payloadu
 			buff = p;
 			prev = *p; //ukazuje na prev pointer -> buduci zaciatok payloadu
-			next = *(p + 1);
+			*p = NULL; //odstranenie pointrov
+			next = *(p++); 
+			*(p--) = NULL;
 			p = (char*)p + sizeof(char) * size; //skok na koniec payloadu
 			*(unsigned int*)p = (size << 1) | 1; //size end
 			
 
+			
 			p = (char*)p + sizeof(unsigned int);
 			if ((buffSize >> 1) != size) {
 
@@ -113,12 +116,10 @@ void* memory_alloc(unsigned int size) {
 					*p = prev;
 				}
 			}
-				//TODO vycistit pole
-				return buff = (char*)buff +  sizeof(unsigned int);
+			
+			return buff = (char*)buff +  sizeof(unsigned int);
 						
 			
-
-			printf("jo");
 		}
 		
 		p = (char*)p + sizeof(void*) + sizeof(unsigned int);
