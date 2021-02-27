@@ -19,9 +19,9 @@ int main() {
 	memory_init(memory, MEMSIZE);
 	void** a, **b, *c;
 	a = memP;
+	b = memory_alloc(sizeof(char) * 80);
 	c = memory_alloc(sizeof(int) * 4);
 
-	b = memory_alloc(sizeof(char) * 20);
 
 	test();
 	return 0;
@@ -47,6 +47,11 @@ void* memory_alloc(unsigned int size) {
 
 		if ((buffSize >> 1) > size && (buffSize & 1) == 0) {
 
+			if (((buffSize >> 1) - size -  sizeof(unsigned int)) <= (2 * sizeof(void*) + 2 * sizeof(unsigned int))) { //zmensena free bunka nie je dost velka
+
+				size = buffSize >> 1;
+			}
+
 			*(unsigned int*)p = (size << 1) | 1; //size begin
 			p = (char*)p + sizeof(unsigned int); //skok na zaciatok payloadu
 			buff = p;
@@ -55,9 +60,14 @@ void* memory_alloc(unsigned int size) {
 			p = (char*)p + sizeof(char) * size; //skok na koniec payloadu
 			*(unsigned int*)p = (size << 1) | 1; //size end
 			
-			if (((buffSize >> 1) - size - 2*sizeof(unsigned int) )> (2*sizeof(void*) + 2*sizeof(unsigned int))) { //zmensena free bunka je dost velka
-				p = (char*)p + sizeof(unsigned int);
+
+			p = (char*)p + sizeof(unsigned int);
+			if ((buffSize >> 1) != size) {
+
 				*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
+				p = (char*)p + ((buffSize >> 1) - size - 1 * sizeof(unsigned int) );
+				*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
+				p = (char*)p - ((buffSize >> 1) - size - 1 * sizeof(unsigned int));
 				
 				
 				if (prev == NULL) { //prev == NULL
@@ -71,7 +81,7 @@ void* memory_alloc(unsigned int size) {
 				}
 				p = p + 1; //mal by ukazovat na next novej free bunky
 
-				if (next != NULL) {
+				if (next == NULL) {
 					*p = NULL;
 				}
 				else {
@@ -82,13 +92,30 @@ void* memory_alloc(unsigned int size) {
 					
 				}
 				
-				//TODO vycistit pole
-				return buff = (char*)buff +  sizeof(unsigned int);
-				
 			}
 			else {
-
+				if (prev == NULL && next == NULL) {
+					*memP = NULL;
+				}
+				else if (prev == NULL && next != NULL){
+					*memP = p;
+					p = (char*)next + sizeof(unsigned int); //?
+					*p = NULL;
+				}
+				else if (prev != NULL && next == NULL) {
+					p = (char*)prev + sizeof(unsigned int) + sizeof(void*);
+					*p = NULL;
+				}
+				else {
+					p = (char*)prev + sizeof(unsigned int) + sizeof(void*);
+					*p = next;
+					p = (char*)next + sizeof(unsigned int);
+					*p = prev;
+				}
 			}
+				//TODO vycistit pole
+				return buff = (char*)buff +  sizeof(unsigned int);
+						
 			
 
 			printf("jo");
@@ -97,6 +124,8 @@ void* memory_alloc(unsigned int size) {
 		p = (char*)p + sizeof(void*) + sizeof(unsigned int);
 
 	}
+	printf("nedostatok miesta!\n");
+	return NULL; //TODO kukni co ma vratit
 }
 
 void memory_init(void* ptr, unsigned int size) {
@@ -107,7 +136,7 @@ void memory_init(void* ptr, unsigned int size) {
 
 	//TODO zmenit buffsize na realnu velkost
 	p = p + 1;
-	unsigned int BuffSize = ((size - 3*sizeof(void*) - 2*sizeof(unsigned int) ) << 1); //velkost s bitom na urcenie zaplnenia
+	unsigned int BuffSize = ((size - sizeof(void*) - 2*sizeof(unsigned int) ) << 1); //velkost s bitom na urcenie zaplnenia
 
 	
 	*(unsigned int*)p = BuffSize;
