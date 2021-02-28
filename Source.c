@@ -13,6 +13,9 @@ void memory_init(void* ptr, unsigned int size);
 void* memory_alloc(unsigned int size);
 int memory_free(void* valid_ptr);
 int memory_check(void* ptr);
+void clearArray(void* ptr, unsigned int size);
+int checkPrevCell(void** p);
+int checkNextCell(void** p);
 
 
 void test();
@@ -22,7 +25,8 @@ int main() {
 	memory_init(memory, MEMSIZE);
 	void** a, *b, *c;
 	a = memP;
-	b = memory_alloc(sizeof(char) * 80);
+	b = memory_alloc(sizeof(char) * 40);
+
 	c = memory_alloc(sizeof(int) * 4);
 	
 	
@@ -45,10 +49,48 @@ int main() {
 //}
 
 int memory_free(void* valid_ptr) {
-	void** p = (char*)valid_ptr - sizeof(unsigned int);
+	if (memory_check(valid_ptr)) {
+
+
+		void** p = (char*)valid_ptr - sizeof(unsigned int);
+		unsigned int size = *(unsigned int*)p >> 1;
+
+		if (size >= 16) {
+			clearArray(valid_ptr, size);
+
+			//check prev
+			
+
+
+		}
+		else {
+			//TODO
+		}
+	}
+	else return 1;
+}
+
+int checkNextCell(void** p) {
 	unsigned int size = *(unsigned int*)p >> 1;
+	p = (char*)p + size + sizeof(unsigned int);
+	if ((*(unsigned int*)p & 1) == 1)
+		return 1;
+	else
+		return 0;
+}
+
+int checkPrevCell(void** p) {
+	p = (char*)p - sizeof(unsigned int);
+	if ((*(unsigned int*)p & 1) == 1)
+		return 1;
+	else 
+		return 0;
+}
+
+void clearArray(void* ptr, unsigned int size) {
+
 	int i;
-	p = valid_ptr;
+	void **p = ptr;
 	for (i = 0; i < size / sizeof(void*); i++) {
 		*p++ = NULL;
 	}
@@ -56,7 +98,6 @@ int memory_free(void* valid_ptr) {
 		*(char*)p = NULL;
 		p = (char*)p + sizeof(char);
 	}
-
 }
 
 int memory_check(void* ptr) {
