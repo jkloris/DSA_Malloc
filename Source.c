@@ -12,6 +12,8 @@ void** memP;
 void memory_init(void* ptr, unsigned int size);
 void* memory_alloc(unsigned int size);
 int memory_free(void* valid_ptr);
+int memory_check(void* ptr);
+
 
 void test();
 int main() {
@@ -22,7 +24,11 @@ int main() {
 	a = memP;
 	b = memory_alloc(sizeof(char) * 80);
 	c = memory_alloc(sizeof(int) * 4);
-
+	
+	
+	memory_check(b);
+	memory_check(c);
+	memory_check(a);
 	*(char*)b = 'a';
 	*(int*)b = 88;
 	memory_free(b);
@@ -52,6 +58,20 @@ int memory_free(void* valid_ptr) {
 	}
 
 }
+
+int memory_check(void* ptr) {
+	if (ptr == NULL) {
+		printf("neplatny ptr\n");
+		return 0;
+	}
+	ptr = (char*)ptr - sizeof(unsigned int);
+	if ((*(unsigned int*)ptr & 1) == 0) {
+		printf("neplatny ptr\n");
+		return 0;
+	}
+	return 1;
+}
+
 
 
 void* memory_alloc(unsigned int size) {
