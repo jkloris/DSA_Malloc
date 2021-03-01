@@ -22,3 +22,10 @@ Mozno vyuzi:
 
 *	//void** p = ptr;
 *	//*p = (void**)ptr + 1;
+
+TODO
+* pri testovani uspesnost vykonania mallocu % - interna fragm.
+* dokumentacia testu 
+	* testovacie scenare
+	* statistiky
+	* zlozitost (casova/pamatova)

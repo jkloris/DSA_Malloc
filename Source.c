@@ -30,9 +30,7 @@ int main() {
 	c = memory_alloc(sizeof(int) * 4);
 	
 	
-	memory_check(b);
-	memory_check(c);
-	memory_check(a);
+	
 	*(char*)b = 'a';
 	*(int*)b = 88;
 	memory_free(b);
@@ -52,15 +50,54 @@ int memory_free(void* valid_ptr) {
 	if (memory_check(valid_ptr)) {
 
 
-		void** p = (char*)valid_ptr - sizeof(unsigned int);
+		void** p = (char*)valid_ptr - sizeof(unsigned int); //ukazuje na Head
 		unsigned int size = *(unsigned int*)p >> 1;
 
 		if (size >= 16) {
 			clearArray(valid_ptr, size);
+			short prevBool = checkPrevCell(p);
+			short nextBool = checkNextCell(p);
+			void** next;
+			void** prev;
+			//unsigned int buffSize;
 
-			//check prev
+			if (prevBool && nextBool) {
+
+				
+				next = (char*)p + size + 2 * sizeof(unsigned int) + sizeof(void*);
+				prev = (char*)p - size -  sizeof(unsigned int) + sizeof(void*);
+				*prev = (void*)next; //next predchadzajuceho pola sa rovna next nasledujuceho
+				*next = NULL; //vynuluje next nasledujuceho pola
+				next = (char*)next - sizeof(void*);
+				*next = NULL; //vynuluje prev nasledujuceho pola
+
+				//vynulovanie hlavicky next pola
+				next = (char*)next - sizeof(unsigned int);
+				unsigned int sizeNext = (unsigned int*)next;
+				*(unsigned int*)next = NULL;
+				unsigned int sizeNext = (unsigned int*)next;
+				*(unsigned int*)next = NULL;
+
+				*(unsigned int*)p = NULL;
+				p = (char*)p - sizeof(unsigned int);
+				unsigned int sizePrev = (unsigned int*)prev;
+				*(unsigned int*)p = NULL;
+
+				prev = (char*)prev - sizeof(void*) - sizeof(unsigned int);
+
+				//celkova size, zaciatok
+				*(unsigned int*)prev = (( size + (sizeNext>> 1) + (sizePrev >> 1) + 4 * sizeof(unsigned int) ) << 1);
+				
+				//celkova size, koniec
+				next = (char*)next + sizeNext + 2 * sizeof(unsigned int);
+				*(unsigned int*)next = (( size + (sizeNext >> 1) + (sizePrev >> 1) + 4 * sizeof(unsigned int) ) << 1);
+
+			}
+			else if (prevBool && !nextBool) {
+				next = (char*)p + size + sizeof(unsigned int);
+			}
 			
-
+			printf("d");
 
 		}
 		else {
