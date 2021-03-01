@@ -90,11 +90,19 @@ int memory_free(void* valid_ptr) {
 				
 				//celkova size, koniec
 				next = (char*)next + sizeNext + 2 * sizeof(unsigned int);
-				*(unsigned int*)next = (( size + (sizeNext >> 1) + (sizePrev >> 1) + 4 * sizeof(unsigned int) ) << 1);
-
+				//*(unsigned int*)next = (( size + (sizeNext >> 1) + (sizePrev >> 1) + 4 * sizeof(unsigned int) ) << 1);
+				*(unsigned int*)next = *(unsigned int*)prev;
 			}
 			else if (prevBool && !nextBool) {
 				next = (char*)p + size + sizeof(unsigned int);
+
+				*(unsigned int*)p = NULL;
+				p = (char*)p - sizeof(unsigned int);
+
+				prev = (char*)p - (*(unsigned int*)p >> 1) - sizeof(unsigned int);
+				*(unsigned int*)prev = ((size + (*(unsigned int*)prev >> 1) + 2 * sizeof(unsigned int)) << 1);
+				*(unsigned int*)next = (*(unsigned int*)prev >> 1);
+				*(unsigned int*)p = NULL;
 			}
 			
 			printf("d");
