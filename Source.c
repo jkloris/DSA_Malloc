@@ -16,7 +16,7 @@ int memory_check(void* ptr);
 void clearArray(void* ptr, unsigned int size);
 int checkPrevCell(void** p);
 int checkNextCell(void** p);
-void* findPrevCell(void* ptr);
+void* findPrevCell(void** ptr);
 
 void test();
 int main() {
@@ -33,14 +33,12 @@ int main() {
 	
 	memory_free(c);
 	
-	
-	
-	
 	*(char*)b = 'a';
 	*(int*)b = 88;
-	memory_free(b);
 
-	test();
+	memory_free(d);
+
+	//test();
 	return 0;
 }
 //void show_memory() {
@@ -107,7 +105,7 @@ int memory_free(void* valid_ptr) {
 
 				prev = (char*)p - (*(unsigned int*)p >> 1) - sizeof(unsigned int);
 				*(unsigned int*)prev = ((size + (*(unsigned int*)prev >> 1) + 2 * sizeof(unsigned int)) << 1);
-				*(unsigned int*)next = (*(unsigned int*)prev >> 1);
+				*(unsigned int*)next = *(unsigned int*)prev ;
 				*(unsigned int*)p = NULL;
 			}
 			else if (!prevBool && nextBool) {
@@ -139,12 +137,20 @@ int memory_free(void* valid_ptr) {
 			}
 			else if (!prevBool && !nextBool) {
 
-				*(unsigned int*)p = (size >> 1) << 1; //oznacenie ze je free, begin
-				prev = findPrevCell(p);
+				*(unsigned int*)p = size << 1; //oznacenie ze je free, begin
+				prev = findPrevCell(&p); //p ukazuje na next free
+				next = p;
 				p = valid_ptr;
 				
 				if (prev == NULL) {
+					p = (char*)p - sizeof(unsigned int);
+					*memP = p;
 
+					p = (char*)p + sizeof(unsigned int) + sizeof(void*);
+					*p = next;
+					
+					p = (char*)valid_ptr - sizeof(unsigned int);
+					
 				}
 				else {
 					*p = prev;
@@ -153,10 +159,14 @@ int memory_free(void* valid_ptr) {
 					*p = *prev; //priradenie next
 					p = (char*)valid_ptr - sizeof(unsigned int);
 					*prev = p;
-					//TODO  next cell ptrs
+					
 				}
+
+				next = (char*)next + sizeof(unsigned int);
+				*next = p;
+
 				p = (char*)valid_ptr + size;
-				*(unsigned int*)p = (size >> 1) << 1; //oznacenie ze je free, end
+				*(unsigned int*)p = size << 1; //oznacenie ze je free, end
 			}
 			
 			printf("d");
@@ -165,19 +175,21 @@ int memory_free(void* valid_ptr) {
 		else {
 			//TODO
 		}
+		return 0;
 	}
 	else return 1;
 }
 
-void* findPrevCell(void* ptr) {
+void* findPrevCell(void** ptr) {
 	void** buff = *memP;
 	void* prev = NULL;
 	
-	while (buff < ptr) {
+	while (buff < *ptr) {
 		prev = buff;
 		buff = (char*)buff + sizeof(void*) + sizeof(unsigned int);
 		buff = *buff;
 	}
+	*ptr = buff;
 	
 	return prev;
 }
@@ -193,6 +205,10 @@ int checkNextCell(void** p) {
 
 int checkPrevCell(void** p) {
 	p = (char*)p - sizeof(unsigned int);
+	if (p < (memP + 1)) {
+		printf("checkPrev overflow\n");
+		return 0;
+	}
 	if ((*(unsigned int*)p & 1) == 1)
 		return 0;
 	else 
