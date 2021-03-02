@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MEMSIZE 100
+#define MEMSIZE 300
 
 //typedef struct _head {
 //	short size;
@@ -16,18 +16,23 @@ int memory_check(void* ptr);
 void clearArray(void* ptr, unsigned int size);
 int checkPrevCell(void** p);
 int checkNextCell(void** p);
-
+void* findPrevCell(void* ptr);
 
 void test();
 int main() {
 
 	char  memory[MEMSIZE];
 	memory_init(memory, MEMSIZE);
-	void** a, *b, *c;
+	void** a, *b, *c, *d, *e, *f;
 	a = memP;
 	b = memory_alloc(sizeof(char) * 40);
-
 	c = memory_alloc(sizeof(int) * 4);
+	d = memory_alloc(sizeof(int) * 7);
+	e = memory_alloc(sizeof(int) * 4);
+	f = memory_alloc(sizeof(int) * 5);
+	
+	memory_free(c);
+	
 	
 	
 	
@@ -75,7 +80,8 @@ int memory_free(void* valid_ptr) {
 				next = (char*)next - sizeof(unsigned int);
 				unsigned int sizeNext = (unsigned int*)next;
 				*(unsigned int*)next = NULL;
-				unsigned int sizeNext = (unsigned int*)next;
+				next = (char*)next - sizeof(unsigned int);
+				//unsigned int sizeNext = (unsigned int*)next;
 				*(unsigned int*)next = NULL;
 
 				*(unsigned int*)p = NULL;
@@ -104,6 +110,54 @@ int memory_free(void* valid_ptr) {
 				*(unsigned int*)next = (*(unsigned int*)prev >> 1);
 				*(unsigned int*)p = NULL;
 			}
+			else if (!prevBool && nextBool) {
+				next = (char*)p + size + sizeof(unsigned int);
+				*(unsigned int*)next = NULL;
+				
+				next = (char*)next + sizeof(unsigned int);
+				unsigned int sizeNext = *(unsigned int*)next >> 1;
+				*(unsigned int*)next = NULL;
+
+				//velkost bunky begin
+				*(unsigned int*)p = (size + sizeNext + 2 * sizeof(unsigned int)) << 1;
+
+
+				//prehodenie pointrov z next na p
+				p = (char*)p + sizeof(unsigned int);
+				next = (char*)next + sizeof(unsigned int);
+				*p = *next;
+				*next = NULL;
+				p = (char*)p + sizeof(void*);
+				next = (char*)next + sizeof(void*);
+				*p = *next;
+				*next = NULL;
+
+
+				//velkost bunky end
+				next = (char*)next + sizeNext - sizeof(void*);
+				*(unsigned int*)next = (size + sizeNext + 2 * sizeof(unsigned int)) << 1;
+			}
+			else if (!prevBool && !nextBool) {
+
+				*(unsigned int*)p = (size >> 1) << 1; //oznacenie ze je free, begin
+				prev = findPrevCell(p);
+				p = valid_ptr;
+				
+				if (prev == NULL) {
+
+				}
+				else {
+					*p = prev;
+					prev = (char*)prev + sizeof(unsigned int) + sizeof(void*);
+					p++;
+					*p = *prev; //priradenie next
+					p = (char*)valid_ptr - sizeof(unsigned int);
+					*prev = p;
+					//TODO  next cell ptrs
+				}
+				p = (char*)valid_ptr + size;
+				*(unsigned int*)p = (size >> 1) << 1; //oznacenie ze je free, end
+			}
 			
 			printf("d");
 
@@ -115,21 +169,34 @@ int memory_free(void* valid_ptr) {
 	else return 1;
 }
 
+void* findPrevCell(void* ptr) {
+	void** buff = *memP;
+	void* prev = NULL;
+	
+	while (buff < ptr) {
+		prev = buff;
+		buff = (char*)buff + sizeof(void*) + sizeof(unsigned int);
+		buff = *buff;
+	}
+	
+	return prev;
+}
+
 int checkNextCell(void** p) {
 	unsigned int size = *(unsigned int*)p >> 1;
-	p = (char*)p + size + sizeof(unsigned int);
+	p = (char*)p + size + 2*sizeof(unsigned int);
 	if ((*(unsigned int*)p & 1) == 1)
-		return 1;
-	else
 		return 0;
+	else
+		return 1;
 }
 
 int checkPrevCell(void** p) {
 	p = (char*)p - sizeof(unsigned int);
 	if ((*(unsigned int*)p & 1) == 1)
-		return 1;
-	else 
 		return 0;
+	else 
+		return 1;
 }
 
 void clearArray(void* ptr, unsigned int size) {
