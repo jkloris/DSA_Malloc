@@ -29,3 +29,4 @@ TODO
 	* testovacie scenare
 	* statistiky
 	* zlozitost (casova/pamatova)
+* best fit

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MEMSIZE 300
+#define MEMSIZE 1000
 
 //typedef struct _head {
 //	short size;
@@ -8,7 +8,7 @@
 //}HEAD;
 
 void** memP;
-//void show_memory();
+
 void memory_init(void* ptr, unsigned int size);
 void* memory_alloc(unsigned int size);
 int memory_free(void* valid_ptr);
@@ -19,52 +19,36 @@ int checkNextCell(void** p);
 void* findPrevCell(void** ptr);
 void changePtrsAroundCell(void* ptr);
 
-void test();
+void z1_testovac(char* region, char** pointer, int minBlock, int maxBlock, int minMemory, int maxMemory, int testFragDefrag);
+
 int main() {
 
-	char  memory[MEMSIZE];
+	char region[100000];
+	char* pointer[13000];
+
+
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+
+	z1_testovac(region, pointer, 8, 1000, 10000, 20000, 0);
+
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+
+
+
+	/*char  memory[MEMSIZE];
 	memory_init(memory, MEMSIZE);
 	void** a = NULL, *b = NULL, *c = NULL, *d = NULL, *e =  NULL, *f = NULL, *g = NULL, *h = NULL;
-
-
-	memory_free(c);
 	a = memP;
-	b = memory_alloc(sizeof(char) * 60);
-	c = memory_alloc(sizeof(int) * 4);
-	d = memory_alloc(sizeof(int) * 7);
-	e = memory_alloc(sizeof(int) * 4);
-	f = memory_alloc(sizeof(int) * 5);
-	g = memory_alloc(sizeof(char) * 21);
-	h = memory_alloc(sizeof(char) * 35);
+
+	void* testArray[10];
 
 
-	memory_free(f);
-	memory_free(e);
-	memory_free(g);
-	memory_free(b);
+
+	memory_free(f);*/
 	
-	f = memory_alloc(sizeof(int) * 5);
-	
-	e = memory_alloc(sizeof(char) * 43); //F-F?
-	
-	memory_free(d);
-
-	d = memory_alloc(sizeof(char) * 20);
-
-	
-	
-
-
-	//test();
 	return 0;
 }
-//void show_memory() {
-//	char *p = (char*)memP;
-//	for (int i = 0; i < MEMSIZE; i++) {
-//		if (*(p + i) == NULL) printf("NULL\n");
-//		else printf("%c\n", *(p + i));
-//	}
-//}
+
 
 int memory_free(void* valid_ptr) {
 	if (memory_check(valid_ptr)) {
@@ -186,8 +170,11 @@ int memory_free(void* valid_ptr) {
 				
 			}
 
-			next = (char*)next + sizeof(unsigned int);
-			*next = p;
+			if (next != NULL) {
+				next = (char*)next + sizeof(unsigned int);
+				*next = p;
+
+			}
 
 			p = (char*)valid_ptr + size;
 			*(unsigned int*)p = size << 1; //oznacenie ze je free, end
@@ -230,8 +217,16 @@ void changePtrsAroundCell(void* ptr) {
 }
 
 void* findPrevCell(void** ptr) {
-	void** buff = *memP;
+	void** buff;
 	void* prev = NULL;
+
+	if(*memP != NULL){
+		buff = *memP;
+	}
+	else {
+		*ptr = NULL;
+		return NULL;
+	}
 	
 	while (buff < *ptr) {
 		prev = buff;
@@ -246,7 +241,7 @@ void* findPrevCell(void** ptr) {
 int checkNextCell(void** p) {
 	unsigned int size = *(unsigned int*)p >> 1;
 	p = (char*)p + size + 2*sizeof(unsigned int);
-	if ((*(unsigned int*)p & 1) == 1)
+	if ((*(unsigned int*)p & 1) == 1 || (*(unsigned int*)p == 0))
 		return 0;
 	else
 		return 1;
@@ -309,7 +304,8 @@ void* memory_alloc(unsigned int size) {
 
 		if ((buffSize >> 1) >= size && (buffSize & 1) == 0) {
 
-			if (((buffSize >> 1) - size -  sizeof(unsigned int)) <= (2 * sizeof(void*) + 2 * sizeof(unsigned int))) { //zmensena free bunka nie je dost velka
+
+			if ( (int)((int)(buffSize >> 1) - (int)size -  (int)sizeof(unsigned int)) <= (int)(2 * sizeof(void*) + 2 * sizeof(unsigned int))) { //zmensena free bunka nie je dost velka
 
 				size = buffSize >> 1;
 			}
@@ -436,88 +432,64 @@ void memory_init(void* ptr, unsigned int size) {
 
 }
 
-void test() {
-	
-	char pole[20];
-	
-	//void** p;
-	void *ptr;
-	ptr = pole ;
-	*(unsigned int*)ptr = 50001;
 
-	int a =  * (unsigned int*)ptr;
-	a = (a << 1) | 1;
-
-	*(unsigned int*)ptr = a;
-	a = *(unsigned int*)ptr >> 1;
-	
-	printf("%d\n", a);
-	////init
-	//*(short*)ptr = 20;
-	//ptr = (char*)ptr + 20 - sizeof(short);
-	//*(short*)ptr = 20;
-
-	////malloc
-	//short a = 10;
-
-	//ptr = pole;
-	//*(short*)ptr = a;
-	//ptr = (char*)ptr + sizeof(short);
-	//*(short*)ptr = a + sizeof(short)*2 - 1;
-	//ptr = (char*)ptr + (a + sizeof(short) ) ;
-	//*(short*)ptr = a;
-
-	//ptr = pole + sizeof(short);
-	//short b = *(short*)ptr;
-	//ptr = (char*)ptr + (a + sizeof(short)*2);
-	//*(short*)ptr = b;
-
-	//HEAD* ph;
-//	p = pole;
-//	*(unsigned short*)p = 99;
-//	*(unsigned short*)p = *(unsigned short*)p & 61440;
-//	
-//	printf("%hu\n",  (1 << (sizeof(unsigned short)*7) + 1111));
-//
-///*
-//	HEAD h;
-//	h.size = 10;
-//	h.n = 'a';
-//*/
-//	p = pole; //p ukazuje na zaciatok ptr
-//	//*ph = h;//vytvori pointer na miesto kde ukazuje p odkazujuci na adresu pravej strany '='
-//
-//	//*ph->next = pole[10];
-//
-//	//*p = &pole[10];
-//	//ptr = ptr + 5;
-//	**(short**)p= 65000;
-//	*p = &pole[2];
-//	**(char**)p = 'c';
-//	ptr = (void**)ptr + 1;
-//	*p = &ptr;
-//
-//
-//	*(char*)ptr = 'a';
-//	ptr= (char*)ptr + 1;
-//	*(char*)ptr= 'a';
-//	ptr = (char*)ptr + 2;
-//
-//	*(char*)ptr = 'a';
-//
-//	//*p = (char)ptr + 8;
-//	**(char**)p = 'b';
-//
-//	/*char* buff = malloc(sizeof(char) * 100);
-//	p = pole;
-//
-
-	//pole[0] = 'A';
-	//printf("%c %d\n", pole[0], pole[0]);
-	//*(int*)p = 1000;
-	//printf("%c %d\n", *(char*)p,pole[0]);
-	//p = (int*)p + 2;
-	//*(char*)p = 'a';
-	//printf("%c %c\n",*(char*)p, pole[0] );
-
+//potom odstranit
+void z1_testovac(char* region, char** pointer, int minBlock, int maxBlock, int minMemory, int maxMemory, int testFragDefrag) {
+	unsigned int allocated = 0;
+	unsigned int mallocated = 0;
+	unsigned int allocated_count = 0;
+	unsigned int mallocated_count = 0;
+	unsigned int i = 0;
+	int random_memory = 0;
+	int random = 0;
+	memset(region, 0, 100000);
+	random_memory = (rand() % (maxMemory - minMemory + 1)) + minMemory;
+	memory_init(region, random_memory);
+	if (testFragDefrag) {
+		do {
+			pointer[i] = memory_alloc(8);
+			if (pointer[i])
+				i++;
+		} while (pointer[i]);
+		for (int j = 0; j < i; j++) {
+			if (memory_check(pointer[j])) {
+				memory_free(pointer[j]);
+			}
+			else {
+				printf("Error: Wrong memory check.\n");
+			}
+		}
+	}
+	i = 0;
+	while (allocated <= random_memory - minBlock) {
+		random = (rand() % (maxBlock - minBlock + 1)) + minBlock;
+		if (allocated + random > random_memory)
+			continue;
+		allocated += random;
+		allocated_count++;
+		pointer[i] = memory_alloc(random);
+		if (pointer[i]) {
+			i++;
+			mallocated_count++;
+			mallocated += random;
+		}
+	}
+	for (int j = 0; j < i; j++) {
+		if (memory_check(pointer[j])) {
+			memory_free(pointer[j]);
+		}
+		else {
+			printf("Error: Wrong memory check.\n");
+		}
+	}
+	memset(region, 0, random_memory);
+	for (int j = 0; j < 100000; j++) {
+		if (region[j] != 0) {
+			region[j] = 0;
+			printf("Error: Modified memory outside the managed region. index: %d\n", j );
+		}
+	}
+	float result = ((float)mallocated_count / allocated_count) * 100;
+	float result_bytes = ((float)mallocated / allocated) * 100;
+	printf("Memory size of %d bytes: allocated %.2f%% blocks (%.2f%% bytes).\n", random_memory, result, result_bytes);
 }
