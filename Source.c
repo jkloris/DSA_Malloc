@@ -26,12 +26,18 @@ int main() {
 	char region[100000];
 	char* pointer[13000];
 
-
+	
 	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+
 
 	z1_testovac(region, pointer, 8, 1000, 10000, 20000, 0);
 
 	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+
+
 
 
 
@@ -250,7 +256,7 @@ int checkNextCell(void** p) {
 int checkPrevCell(void** p) {
 	p = (char*)p - sizeof(unsigned int);
 	if (p < (memP + 1)) {
-		printf("checkPrev overflow\n");
+		//printf("checkPrev overflow\n");
 		return 0;
 	}
 	if ((*(unsigned int*)p & 1) == 1)
@@ -290,17 +296,36 @@ int memory_check(void* ptr) {
 void* memory_alloc(unsigned int size) {
 	void** help = memP; //tmp
 	void** p = memP;
-	void** buff, *prev, * next;
-	unsigned int buffSize;
+	void** buff = NULL, *prev, * next;
+	unsigned int buffSize, bestFitSize = 0;
 
 	if (size < 2 * sizeof(void*)) {
 		size = 2 * sizeof(void*);
 	}
 
-	while (*p != NULL) {
-		buffSize = **(unsigned int**)p;
-
+	//best fit
+	while (*p != NULL ) {
 		p = *p;
+		buffSize = *(unsigned int*)p;
+		if (buffSize == size) {
+			break;
+		}
+
+		if (buffSize > size && (bestFitSize == 0 || buffSize - size < bestFitSize)) {
+			bestFitSize = buffSize - size;
+			buff = p;
+		}
+		p = (char*)p + sizeof(void*) + sizeof(unsigned int);
+
+		//p = *p;
+	}
+	if (buff == NULL)
+		return NULL;
+	p = buff;
+
+	buffSize = *(unsigned int*)p;
+	//while (*p != NULL) {
+
 
 		if ((buffSize >> 1) >= size && (buffSize & 1) == 0) {
 
@@ -393,10 +418,10 @@ void* memory_alloc(unsigned int size) {
 			
 		}
 		
-		p = (char*)p + sizeof(void*) + sizeof(unsigned int);
+		
 
-	}
-	printf("nedostatok miesta!\n");
+//	}
+	//printf("nedostatok miesta!\n");
 	return NULL; //TODO kukni co ma vratit
 }
 
@@ -474,6 +499,7 @@ void z1_testovac(char* region, char** pointer, int minBlock, int maxBlock, int m
 			mallocated += random;
 		}
 	}
+
 	for (int j = 0; j < i; j++) {
 		if (memory_check(pointer[j])) {
 			memory_free(pointer[j]);
