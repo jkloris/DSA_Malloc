@@ -27,25 +27,44 @@ int main() {
 	char* pointer[13000];
 
 
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
 
-	z1_testovac(region, pointer, 8, 1000, 10000, 20000, 0);
-
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-
-
-
-	/*char  memory[MEMSIZE];
-	memory_init(memory, MEMSIZE);
-	void** a = NULL, *b = NULL, *c = NULL, *d = NULL, *e =  NULL, *f = NULL, *g = NULL, *h = NULL;
-	a = memP;
-
-	void* testArray[10];
-
-
-
-	memory_free(f);*/
 	
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0); //mne padol tu
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+
+
+	//pri testovani tychto, treba zakomentovat ostatne
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);//a tu
+
+
 	return 0;
 }
 
@@ -250,7 +269,7 @@ int checkNextCell(void** p) {
 int checkPrevCell(void** p) {
 	p = (char*)p - sizeof(unsigned int);
 	if (p < (memP + 1)) {
-		printf("checkPrev overflow\n");
+		//printf("checkPrev overflow\n");
 		return 0;
 	}
 	if ((*(unsigned int*)p & 1) == 1)
@@ -396,7 +415,7 @@ void* memory_alloc(unsigned int size) {
 		p = (char*)p + sizeof(void*) + sizeof(unsigned int);
 
 	}
-	printf("nedostatok miesta!\n");
+//	printf("nedostatok miesta!\n");
 	return NULL; //TODO kukni co ma vratit
 }
 
