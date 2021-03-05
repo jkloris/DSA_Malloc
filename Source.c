@@ -24,23 +24,32 @@ int main() {
 
 	char  memory[MEMSIZE];
 	memory_init(memory, MEMSIZE);
-	void** a = NULL, *b = NULL, *c = NULL, *d = NULL, *e =  NULL, *f = NULL;
+	void** a = NULL, *b = NULL, *c = NULL, *d = NULL, *e =  NULL, *f = NULL, *g = NULL, *h = NULL;
 
 
 	memory_free(c);
 	a = memP;
-	b = memory_alloc(sizeof(char) * 40);
+	b = memory_alloc(sizeof(char) * 60);
 	c = memory_alloc(sizeof(int) * 4);
 	d = memory_alloc(sizeof(int) * 7);
 	e = memory_alloc(sizeof(int) * 4);
 	f = memory_alloc(sizeof(int) * 5);
-	memory_free(d);
-	memory_free(f);
-	memory_free(c);
-	
-	c = memory_alloc(sizeof(int) * 3);
+	g = memory_alloc(sizeof(char) * 21);
+	h = memory_alloc(sizeof(char) * 35);
 
+
+	memory_free(f);
+	memory_free(e);
+	memory_free(g);
 	memory_free(b);
+	
+	f = memory_alloc(sizeof(int) * 5);
+	
+	e = memory_alloc(sizeof(char) * 43); //F-F?
+	
+	memory_free(d);
+
+	d = memory_alloc(sizeof(char) * 20);
 
 	
 	
@@ -118,7 +127,7 @@ int memory_free(void* valid_ptr) {
 			*(unsigned int*)next = *(unsigned int*)prev ;
 			*(unsigned int*)p = NULL;
 
-			changePtrsAroundCell(valid_ptr);
+			//changePtrsAroundCell(valid_ptr);
 		}
 		else if (!prevBool && nextBool) {
 			next = (char*)p + size + sizeof(unsigned int);
@@ -332,8 +341,17 @@ void* memory_alloc(unsigned int size) {
 					*p = NULL; //nove prev
 				}
 				else {
-					p = (char*)p + sizeof(unsigned int);
-					*p = prev; //lepsie otestovat
+					buff = p;
+					p = (char*)p + sizeof(unsigned int); //ukazuje na prev novej free bunky
+					*p = prev; 
+					p = *p;
+					p = (char*)p + sizeof(unsigned int) + sizeof(void*);
+
+					*p = buff;
+					p = *p;
+					p = (char*)p + sizeof(unsigned int); //ukazuje na prev novej free bunky
+					//
+
 				}
 				p = p + 1; //mal by ukazovat na next novej free bunky
 
