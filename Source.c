@@ -19,6 +19,7 @@ int checkNextCell(void** p);
 void* findPrevCell(void** ptr);
 void changePtrsAroundCell(void* ptr);
 
+void test1(char* region, char** pointer, unsigned int initSize, unsigned int blockSize);
 void z1_testovac(char* region, char** pointer, int minBlock, int maxBlock, int minMemory, int maxMemory, int testFragDefrag);
 
 int main() {
@@ -26,57 +27,70 @@ int main() {
 	char region[100000];
 	char* pointer[13000];
 
+	test1(region, pointer, 1000, 21);
 
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
 
-	
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0); //mne padol tu
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	//
+	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	//
 
 
-	//pri testovani tychto, treba zakomentovat ostatne
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);//a tu
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);//a tu
+
+
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
 
 
 	return 0;
+}
+
+void test1(char* region, char** pointer, unsigned int initSize, unsigned int blockSize) {
+	unsigned int allocAll = 0, allocSucces = 0;
+	int i, e, randIndex, count = 0; ;
+	char* tempP;
+	memory_init(region, initSize);
+
+
+	for (i = 0; i < (initSize / blockSize); i++) {
+		if ( (pointer[i] = memory_alloc(blockSize))!= NULL ) {
+			allocSucces += blockSize;
+			count++;
+		}
+		allocAll += blockSize;
+	}
+	printf("%.2f%% bytov \n", (float)allocSucces / allocAll * 100);
+
+	for (e = 0; e < count; e++) {
+		randIndex = (rand() % (count - e ));
+		if (memory_free(pointer[randIndex]) == 1 ) {
+			printf("free error pointer %d\n", randIndex);
+		}
+		
+		tempP = pointer[count - e - 1];
+		pointer[count - e - 1] = pointer[randIndex];
+		pointer[randIndex] = tempP;
+
+	}
+
+
+
 }
 
 
@@ -103,7 +117,7 @@ int memory_free(void* valid_ptr) {
 				
 			next = (char*)p + size + 3 * sizeof(unsigned int) + sizeof(void*);
 			prev = (char*)p - sizePrev -  sizeof(unsigned int) + sizeof(void*);
-			*prev = (void*)next; //next predchadzajuceho pola sa rovna next nasledujuceho
+			*prev = *next; //next predchadzajuceho pola sa rovna next nasledujuceho
 			*next = NULL; //vynuluje next nasledujuceho pola
 			next = (char*)next - sizeof(void*);
 			*next = NULL; //vynuluje prev nasledujuceho pola
@@ -132,7 +146,8 @@ int memory_free(void* valid_ptr) {
 			//*(unsigned int*)next = (( size + (sizeNext >> 1) + (sizePrev >> 1) + 4 * sizeof(unsigned int) ) << 1);
 			*(unsigned int*)next = *(unsigned int*)prev;
 
-			changePtrsAroundCell(valid_ptr);
+			prev = (char*)prev + sizeof(unsigned int);
+			changePtrsAroundCell(prev);
 		}
 		else if (prevBool && !nextBool) {
 			next = (char*)p + size + sizeof(unsigned int);
@@ -265,7 +280,13 @@ void* findPrevCell(void** ptr) {
 	while (buff < *ptr) {
 		prev = buff;
 		buff = (char*)buff + sizeof(void*) + sizeof(unsigned int);
-		buff = *buff;
+		if (*buff != NULL)
+			buff = *buff;
+		else {
+			*ptr = NULL;
+			return prev;
+		}
+			
 	}
 	*ptr = buff;
 	
