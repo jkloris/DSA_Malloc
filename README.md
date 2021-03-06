@@ -30,3 +30,4 @@ TODO
 	* statistiky
 	* zlozitost (casova/pamatova)
 * best fit
+* pri free P&&N ked sa uvolni cela pamat, memP a nextP su zle. Pri strednych testoch to je vidno

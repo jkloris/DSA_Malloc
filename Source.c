@@ -29,8 +29,8 @@ int main() {
 
 	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
 
-	
 	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	
 	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
 	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
 	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
@@ -86,9 +86,12 @@ int memory_free(void* valid_ptr) {
 
 		if (prevBool && nextBool) {
 
-			
-			next = (char*)p + size + 2 * sizeof(unsigned int) + sizeof(void*);
-			prev = (char*)p - size -  sizeof(unsigned int) + sizeof(void*);
+			p = (char*)p - sizeof(unsigned int);//asi
+			unsigned int sizePrev = *(unsigned int*)p >> 1;
+			p = (char*)p + sizeof(unsigned int);//asi
+				
+			next = (char*)p + size + 3 * sizeof(unsigned int) + sizeof(void*);
+			prev = (char*)p - sizePrev -  sizeof(unsigned int) + sizeof(void*);
 			*prev = (void*)next; //next predchadzajuceho pola sa rovna next nasledujuceho
 			*next = NULL; //vynuluje next nasledujuceho pola
 			next = (char*)next - sizeof(void*);
@@ -96,7 +99,8 @@ int memory_free(void* valid_ptr) {
 
 			//vynulovanie hlavicky next pola
 			next = (char*)next - sizeof(unsigned int);
-			unsigned int sizeNext = (unsigned int*)next;
+			unsigned int sizeNext = *(unsigned int*)next;
+			sizeNext >>= 1;
 			*(unsigned int*)next = NULL;
 			next = (char*)next - sizeof(unsigned int);
 			//unsigned int sizeNext = (unsigned int*)next;
@@ -104,13 +108,13 @@ int memory_free(void* valid_ptr) {
 
 			*(unsigned int*)p = NULL;
 			p = (char*)p - sizeof(unsigned int);
-			unsigned int sizePrev = (unsigned int*)prev;
+			//sizePrev = (unsigned int*)prev;
 			*(unsigned int*)p = NULL;
 
 			prev = (char*)prev - sizeof(void*) - sizeof(unsigned int);
 
 			//celkova size, zaciatok
-			*(unsigned int*)prev = (( size + (sizeNext>> 1) + (sizePrev >> 1) + 4 * sizeof(unsigned int) ) << 1);
+			*(unsigned int*)prev = (( size + (sizeNext) + (sizePrev) + 4 * sizeof(unsigned int) ) << 1);
 			
 			//celkova size, koniec
 			next = (char*)next + sizeNext + 2 * sizeof(unsigned int);
@@ -260,7 +264,7 @@ void* findPrevCell(void** ptr) {
 int checkNextCell(void** p) {
 	unsigned int size = *(unsigned int*)p >> 1;
 	p = (char*)p + size + 2*sizeof(unsigned int);
-	if ((*(unsigned int*)p & 1) == 1 || (*(unsigned int*)p == 0))
+	if ((*(unsigned int*)p & 1) == 1 || (*(unsigned int*)p == 0) || (*(unsigned int*)p == NULL))
 		return 0;
 	else
 		return 1;
@@ -321,7 +325,7 @@ void* memory_alloc(unsigned int size) {
 
 		p = *p;
 
-		if ((buffSize >> 1) >= size && (buffSize & 1) == 0) {
+		if ((buffSize >> 1) >= size && ((buffSize & 1) == 0) && (buffSize != 0) ) {
 
 
 			if ( (int)((int)(buffSize >> 1) - (int)size -  (int)sizeof(unsigned int)) <= (int)(2 * sizeof(void*) + 2 * sizeof(unsigned int))) { //zmensena free bunka nie je dost velka
@@ -427,13 +431,15 @@ void memory_init(void* ptr, unsigned int size) {
 
 	//TODO zmenit buffsize na realnu velkost - asi done? 
 	p = p + 1;
-	unsigned int BuffSize = ((size - sizeof(void*) - 2*sizeof(unsigned int) ) << 1); //velkost s bitom na urcenie zaplnenia
+	unsigned int BuffSize = ((size - sizeof(void*) - 3*sizeof(unsigned int) ) << 1); //velkost s bitom na urcenie zaplnenia
 
 	
 	*(unsigned int*)p = BuffSize;
 
-	p = (char*)ptr + sizeof(char) * (size - sizeof(unsigned int)); //poslednych sizeof(int) miest memory pola
+	p = (char*)ptr + size - 2*sizeof(unsigned int); //poslednych sizeof(int) miest memory pola
 	*(unsigned int*)p = BuffSize;
+	p = (char*)p + sizeof(unsigned int);
+	*(unsigned int*)p = NULL;
 	
 	
 	//next a last ptr su zatial NULL
@@ -443,9 +449,9 @@ void memory_init(void* ptr, unsigned int size) {
 	*p = NULL; //next
 
 
-	//
-	p = ptr;
-	BuffSize = **(unsigned int**)p;
+	//toto som tu asi zabudol kvoli niecomu
+	/*p = ptr;
+	BuffSize = **(unsigned int**)p;*/
 
 	memP = ptr;
 
