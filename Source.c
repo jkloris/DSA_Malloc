@@ -14,12 +14,13 @@ void changePtrsAroundCell(void* ptr);
 
 void test1(char* region, char** pointer, unsigned int initSize, unsigned int blockSize);
 void test2(char* region, char** pointer, unsigned int initSize, unsigned int minBlockSize, unsigned int maxBlockSize);
-void z1_testovac(char* region, char** pointer, int minBlock, int maxBlock, int minMemory, int maxMemory, int testFragDefrag);
+
 
 int main() {
 
 	char region[100000];
 	char* pointer[10000];
+
 
 	int i,j;
 
@@ -31,7 +32,7 @@ int main() {
 		test2(region, pointer, j, 8, 24);
 	}
 
-	test2(region, pointer, 10000, 500,5000);
+	test2(region, pointer, 10000, 500, 5000);
 	test2(region, pointer, 10000, 500, 5000);
 	test2(region, pointer, 10000, 500, 5000);
 	test2(region, pointer, 10000, 500, 5000);
@@ -44,26 +45,6 @@ int main() {
 	test2(region, pointer, 100000, 8, 50000);
 	test2(region, pointer, 100000, 8, 50000);
 	
-
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-
-
 	return 0;
 }
 
@@ -71,12 +52,12 @@ int main() {
 
 
 void test2(char* region, char** pointer, unsigned int initSize, unsigned int minBlockSize, unsigned int maxBlockSize) {
-	unsigned int allocAll = 0, allocSucces = 0;
+	unsigned int allocAll = 0, allocSucces = 0, blocksAll = 0;
 	int i=0, e, randSize, randIndex, count = 0; 
 	char* tempP;
 	
 	memory_init(region, initSize);
-
+	//alokuje bloky s nahodnymi velkostami
 	while (initSize > allocAll) {
 		randSize = rand() % (maxBlockSize - minBlockSize) + minBlockSize;
 		if ((pointer[i++] = memory_alloc(randSize)) != NULL) {
@@ -84,12 +65,14 @@ void test2(char* region, char** pointer, unsigned int initSize, unsigned int min
 			count++;
 		}
 		allocAll += randSize;
+		blocksAll++;
 	}
 
-	for (e = 0; e < (count ); e++) {
+	//uvolni nahodny bloky
+	for (e = 0; e < count ; e++) {
 		randIndex = (rand() % (count - e));
-		if (memory_free(pointer[randIndex]) == 1) {
-			printf("free error pointer %d\n", randIndex);
+		if (memory_free(pointer[randIndex]) == 1) { // vo funkcii memory_free je memory check, ktory skontroluje ci je pointer validny
+			printf("ERROR[memory_free], non-valid pointer\n");
 		}
 
 		tempP = pointer[count - e - 1];
@@ -98,30 +81,34 @@ void test2(char* region, char** pointer, unsigned int initSize, unsigned int min
 
 	}
 
-
 	memset(region, 0, initSize); 
-	printf("memory size: %u bytov, alokovanych: %.2f%% bytov \n", initSize, (float)allocSucces / allocAll * 100);
+	
+	printf("memory size: %u bytov, alokovanych: %.2f%% bytov, %.2f%% blokov\n", initSize, (float)allocSucces / allocAll * 100, (float)count / blocksAll * 100);
 }
 
+
 void test1(char* region, char** pointer, unsigned int initSize, unsigned int blockSize) {
-	unsigned int allocAll = 0, allocSucces = 0;
+	unsigned int allocAll = 0, allocSucces = 0, blocksAll = 0, freeCounter = 0;
 	int i, e, randIndex, count = 0; ;
 	char* tempP;
+	void** buff;
 	memory_init(region, initSize);
 
-
+	//alokuje bloky so zadanou velkostou
 	for (i = 0; i < (initSize / blockSize ); i++) {
 		if ( (pointer[i] = memory_alloc(blockSize))!= NULL ) {
 			allocSucces += blockSize;
 			count++;
 		}
+		blocksAll++;
 		allocAll += blockSize;
 	}
 
-	for (e = 0; e < (count ); e++) {
+	//uvolni nahodne bloky
+	for (e = 0; e < count ; e++) {
 		randIndex = (rand() % (count - e ));
-		if (memory_free(pointer[randIndex]) == 1 ) {
-			printf("free error pointer %d\n", randIndex);
+		if (memory_free(pointer[randIndex]) == 1 ) { // vo funkcii memory_free je memory check, ktory skontroluje ci je pointer validny
+			printf("ERROR[memory_free], non-valid pointer\n");
 		}
 		
 		tempP = pointer[count - e - 1];
@@ -130,22 +117,21 @@ void test1(char* region, char** pointer, unsigned int initSize, unsigned int blo
 
 	}
 
-
+	
 	memset(region, 0, initSize);
-	printf("memory size: %u bytov, alokovanych: %.2f%% bytov \n",initSize, (float)allocSucces / allocAll * 100);
+	printf("memory size: %u bytov, alokovanych: %.2f%% bytov, %.2f%% blokov \n",initSize, (float)allocSucces / allocAll * 100, (float)count / blocksAll * 100);
 }
 
 
 int memory_free(void* valid_ptr) {
-	if (memory_check(valid_ptr)) {
-
+	if (memory_check(valid_ptr)) {//kontrola ci je pointer validny
 
 		void** p = (char*)valid_ptr - sizeof(unsigned int); //ukazuje na Head
 		unsigned int size = *(unsigned int*)p >> 1;
 
-		
 		clearArray(valid_ptr, size);
-		short prevBool = checkPrevCell(p);
+		//skontroluje ci je pred a za bunkou ina volna bunka
+		short prevBool = checkPrevCell(p); 
 		short nextBool = checkNextCell(p);
 		void** next;
 		void** prev;
@@ -274,6 +260,7 @@ int memory_free(void* valid_ptr) {
 }
 
 //ptr by mal ukazovat na zaciatok payloadu
+//zmeni pointre v okolitych volnych blokoch
 void changePtrsAroundCell(void* ptr) {
 	void** p, **buff;
 	buff = (char*)ptr - sizeof(unsigned int);
@@ -301,6 +288,7 @@ void changePtrsAroundCell(void* ptr) {
 
 }
 
+//najde predchadzajucu volnu bunku
 void* findPrevCell(void** ptr) {
 	void** buff;
 	void* prev = NULL;
@@ -379,16 +367,17 @@ int memory_check(void* ptr) {
 
 void* memory_alloc(unsigned int size) {
 	void** p = memP;
-	void** buff = NULL, *prev, * next;
+	void** buff = NULL, *prev, * next, **buff2= NULL;
 	unsigned int buffSize, bestFitSize = 0;
 
 	if (size < 2 * sizeof(void*)) {
 		size = 2 * sizeof(void*);
 	}
 
+	//best fit, najde najvhodnejsi volny block
 	while (*p != NULL) {
 		p = *p;
-		buffSize = *(unsigned int*)p;
+		buffSize = *(unsigned int*)p >> 1;
 		if (buffSize == size) {
 			break;
 		}
@@ -410,8 +399,8 @@ void* memory_alloc(unsigned int size) {
 
 	if ((buffSize >> 1) >= size && ((buffSize & 1) == 0) && (buffSize != 0) ) {
 
-
-		if ( (int)((int)(buffSize >> 1) - (int)size -  (int)sizeof(unsigned int)) <= (int)(2 * sizeof(void*) + 2 * sizeof(unsigned int))) { //zmensena free bunka nie je dost velka
+		//ak nova bunka, ktora by vznikla nie je dost velka, pozadovana velkost sa zaokruhli
+		if ( (int)((int)(buffSize >> 1) - (int)size -  (int)sizeof(unsigned int)) <= (int)(2 * sizeof(void*) + 2 * sizeof(unsigned int))) { 
 
 			size = buffSize >> 1;
 		}
@@ -426,9 +415,9 @@ void* memory_alloc(unsigned int size) {
 		p = (char*)p + sizeof(char) * size; //skok na koniec payloadu
 		*(unsigned int*)p = (size << 1) | 1; //size end
 		
-
-		
 		p = (char*)p + sizeof(unsigned int);
+		
+		//ak vznikla nova volna bunka
 		if ((buffSize >> 1) != size) {
 
 			*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
@@ -436,20 +425,20 @@ void* memory_alloc(unsigned int size) {
 			*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
 			p = (char*)p - ((buffSize >> 1) - size - 1 * sizeof(unsigned int));
 			
-			
-			if (prev == NULL) { //prev == NULL
+			//priradovanie pointrov novej volnej bunke
+			if (prev == NULL) { 
 				*memP = p; //. zaciatok ukazuje na nove pole
 				p = (char*)p + sizeof(unsigned int);
 				*p = NULL; //nove prev
 			}
 			else {
-				buff = p;
+				buff2 = p;
 				p = (char*)p + sizeof(unsigned int); //ukazuje na prev novej free bunky
 				*p = prev; 
 				p = *p;
 				p = (char*)p + sizeof(unsigned int) + sizeof(void*);
 
-				*p = buff;
+				*p = buff2;
 				p = *p;
 				p = (char*)p + sizeof(unsigned int); //ukazuje na prev novej free bunky
 				//
@@ -462,14 +451,13 @@ void* memory_alloc(unsigned int size) {
 			}
 			else {
 
-				buff = (char*)p - sizeof(void*) - sizeof(unsigned int);
+				buff2 = (char*)p - sizeof(void*) - sizeof(unsigned int);
 				*p = next;
 				p = *p;
 				p = (char*)p + sizeof(unsigned int); // ukazuje na prev NewFree
 
-				*p = buff; //na adresu kde ukazuje p sa ulozila adresa kde ukazuje buff
+				*p = buff2; //na adresu kde ukazuje p sa ulozila adresa kde ukazuje buff
 
-				
 			}
 			
 		}
@@ -500,7 +488,7 @@ void* memory_alloc(unsigned int size) {
 	}
 		
 	
-	return NULL; //TODO kukni co ma vratit
+	return NULL; 
 }
 
 void memory_init(void* ptr, unsigned int size) {
@@ -508,13 +496,11 @@ void memory_init(void* ptr, unsigned int size) {
 	void** p = ptr;
 	*p = (void**)ptr + 1; // pointer to pointer ptr[sizeof(void*)]
 
-
 	p = p + 1;
 	unsigned int BuffSize = ((size - sizeof(void*) - 3*sizeof(unsigned int) ) << 1); //velkost s bitom na urcenie zaplnenia
 
-	
+	//tvorba hlavicky a paty celej pamate
 	*(unsigned int*)p = BuffSize;
-
 	p = (char*)ptr + size - 2*sizeof(unsigned int); //poslednych sizeof(int) miest memory pola
 	*(unsigned int*)p = BuffSize;
 	p = (char*)p + sizeof(unsigned int);
@@ -527,68 +513,6 @@ void memory_init(void* ptr, unsigned int size) {
 	p = p + 1;
 	*p = NULL; //next
 
-
 	memP = ptr;
 }
 
-
-//potom odstranit
-void z1_testovac(char* region, char** pointer, int minBlock, int maxBlock, int minMemory, int maxMemory, int testFragDefrag) {
-	unsigned int allocated = 0;
-	unsigned int mallocated = 0;
-	unsigned int allocated_count = 0;
-	unsigned int mallocated_count = 0;
-	unsigned int i = 0;
-	int random_memory = 0;
-	int random = 0;
-	memset(region, 0, 100000);
-	random_memory = (rand() % (maxMemory - minMemory + 1)) + minMemory;
-	memory_init(region, random_memory);
-	if (testFragDefrag) {
-		do {
-			pointer[i] = memory_alloc(8);
-			if (pointer[i])
-				i++;
-		} while (pointer[i]);
-		for (int j = 0; j < i; j++) {
-			if (memory_check(pointer[j])) {
-				memory_free(pointer[j]);
-			}
-			else {
-				printf("Error: Wrong memory check.\n");
-			}
-		}
-	}
-	i = 0;
-	while (allocated <= random_memory - minBlock) {
-		random = (rand() % (maxBlock - minBlock + 1)) + minBlock;
-		if (allocated + random > random_memory)
-			continue;
-		allocated += random;
-		allocated_count++;
-		pointer[i] = memory_alloc(random);
-		if (pointer[i]) {
-			i++;
-			mallocated_count++;
-			mallocated += random;
-		}
-	}
-	for (int j = 0; j < i; j++) {
-		if (memory_check(pointer[j])) {
-			memory_free(pointer[j]);
-		}
-		else {
-			printf("Error: Wrong memory check.\n");
-		}
-	}
-	memset(region, 0, random_memory);
-	for (int j = 0; j < 100000; j++) {
-		if (region[j] != 0) {
-			region[j] = 0;
-			printf("Error: Modified memory outside the managed region. index: %d\n", j );
-		}
-	}
-	float result = ((float)mallocated_count / allocated_count) * 100;
-	float result_bytes = ((float)mallocated / allocated) * 100;
-	printf("Memory size of %d bytes: allocated %.2f%% blocks (%.2f%% bytes).\n", random_memory, result, result_bytes);
-}
