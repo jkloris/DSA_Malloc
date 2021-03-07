@@ -1,13 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
-#define MEMSIZE 1000
 
-//typedef struct _head {
-//	short size;
-//	char n;
-//}HEAD;
-
-void** memP;
+void** memP; //ukazuje na zaciatok pamate region
 
 void memory_init(void* ptr, unsigned int size);
 void* memory_alloc(unsigned int size);
@@ -20,45 +13,49 @@ void* findPrevCell(void** ptr);
 void changePtrsAroundCell(void* ptr);
 
 void test1(char* region, char** pointer, unsigned int initSize, unsigned int blockSize);
+void test2(char* region, char** pointer, unsigned int initSize, unsigned int minBlockSize, unsigned int maxBlockSize);
 void z1_testovac(char* region, char** pointer, int minBlock, int maxBlock, int minMemory, int maxMemory, int testFragDefrag);
 
 int main() {
 
 	char region[100000];
-	char* pointer[13000];
+	char* pointer[10000];
 
-	test1(region, pointer, 1000, 21);
+	
 
-	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	/*test1(region, pointer, 1000, 21);
+
+	test2(region, pointer, 1000, 8, 24);*/
+
 	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
 
-	//
+
 	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-	//
 
 
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);//a tu
-
-
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
 	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
 
 
 	return 0;
+}
+
+
+void test2(char* region, char** pointer, unsigned int initSize, unsigned int minBlockSize, unsigned int maxBlockSize) {
+	unsigned int allocAll = 0, allocSucces = 0;
+	int i=0, e, randSize, count = 0; ;
+	
+	memory_init(region, initSize);
+
+	while (initSize > allocAll) {
+		randSize = rand() % (maxBlockSize - minBlockSize) + minBlockSize;
+		if ((pointer[i++] = memory_alloc(randSize)) != NULL) {
+			allocSucces += randSize;
+			count++;
+		}
+		allocAll += randSize;
+	}
+	memset(region, 0, initSize); 
+	printf("%.2f%% bytov \n", (float)allocSucces / allocAll * 100);
 }
 
 void test1(char* region, char** pointer, unsigned int initSize, unsigned int blockSize) {
@@ -68,16 +65,15 @@ void test1(char* region, char** pointer, unsigned int initSize, unsigned int blo
 	memory_init(region, initSize);
 
 
-	for (i = 0; i < (initSize / blockSize); i++) {
+	for (i = 0; i < (initSize / blockSize / 2); i++) {
 		if ( (pointer[i] = memory_alloc(blockSize))!= NULL ) {
 			allocSucces += blockSize;
 			count++;
 		}
 		allocAll += blockSize;
 	}
-	printf("%.2f%% bytov \n", (float)allocSucces / allocAll * 100);
 
-	for (e = 0; e < count; e++) {
+	for (e = 0; e < (count / 2); e++) {
 		randIndex = (rand() % (count - e ));
 		if (memory_free(pointer[randIndex]) == 1 ) {
 			printf("free error pointer %d\n", randIndex);
@@ -89,8 +85,17 @@ void test1(char* region, char** pointer, unsigned int initSize, unsigned int blo
 
 	}
 
+	for (i = e; i < (initSize / blockSize ); i++) {
+		if ((pointer[i] = memory_alloc(blockSize)) != NULL) {
+			allocSucces += blockSize;
+			count++;
+		}
+		allocAll += blockSize;
+	}
 
 
+	memset(region, 0, initSize);
+	printf("%.2f%% bytov \n", (float)allocSucces / allocAll * 100);
 }
 
 
@@ -111,9 +116,9 @@ int memory_free(void* valid_ptr) {
 
 		if (prevBool && nextBool) {
 
-			p = (char*)p - sizeof(unsigned int);//asi
+			p = (char*)p - sizeof(unsigned int);
 			unsigned int sizePrev = *(unsigned int*)p >> 1;
-			p = (char*)p + sizeof(unsigned int);//asi
+			p = (char*)p + sizeof(unsigned int);
 				
 			next = (char*)p + size + 3 * sizeof(unsigned int) + sizeof(void*);
 			prev = (char*)p - sizePrev -  sizeof(unsigned int) + sizeof(void*);
@@ -128,12 +133,10 @@ int memory_free(void* valid_ptr) {
 			sizeNext >>= 1;
 			*(unsigned int*)next = NULL;
 			next = (char*)next - sizeof(unsigned int);
-			//unsigned int sizeNext = (unsigned int*)next;
 			*(unsigned int*)next = NULL;
 
 			*(unsigned int*)p = NULL;
 			p = (char*)p - sizeof(unsigned int);
-			//sizePrev = (unsigned int*)prev;
 			*(unsigned int*)p = NULL;
 
 			prev = (char*)prev - sizeof(void*) - sizeof(unsigned int);
@@ -143,7 +146,6 @@ int memory_free(void* valid_ptr) {
 			
 			//celkova size, koniec
 			next = (char*)next + sizeNext + 2 * sizeof(unsigned int);
-			//*(unsigned int*)next = (( size + (sizeNext >> 1) + (sizePrev >> 1) + 4 * sizeof(unsigned int) ) << 1);
 			*(unsigned int*)next = *(unsigned int*)prev;
 
 			prev = (char*)prev + sizeof(unsigned int);
@@ -160,7 +162,6 @@ int memory_free(void* valid_ptr) {
 			*(unsigned int*)next = *(unsigned int*)prev ;
 			*(unsigned int*)p = NULL;
 
-			//changePtrsAroundCell(valid_ptr);
 		}
 		else if (!prevBool && nextBool) {
 			next = (char*)p + size + sizeof(unsigned int);
@@ -175,7 +176,6 @@ int memory_free(void* valid_ptr) {
 
 
 			//prehodenie pointrov z next na p
-			
 			p = (char*)p + sizeof(unsigned int);
 			next = (char*)next + sizeof(unsigned int);
 			*p = *next;
@@ -205,7 +205,6 @@ int memory_free(void* valid_ptr) {
 
 				p = (char*)p + sizeof(unsigned int) + sizeof(void*);
 				*p = next;
-				
 				p = (char*)valid_ptr - sizeof(unsigned int);
 				
 			}
@@ -305,7 +304,6 @@ int checkNextCell(void** p) {
 int checkPrevCell(void** p) {
 	p = (char*)p - sizeof(unsigned int);
 	if (p < (memP + 1)) {
-		//printf("checkPrev overflow\n");
 		return 0;
 	}
 	if ((*(unsigned int*)p & 1) == 1)
@@ -343,7 +341,6 @@ int memory_check(void* ptr) {
 
 
 void* memory_alloc(unsigned int size) {
-	void** help = memP; //tmp
 	void** p = memP;
 	void** buff = NULL, *prev, * next;
 	unsigned int buffSize, bestFitSize = 0;
@@ -364,115 +361,108 @@ void* memory_alloc(unsigned int size) {
 			buff = p;
 		}
 		p = (char*)p + sizeof(void*) + sizeof(unsigned int);
-
-		//p = *p;
 	}
+
 	if (buff == NULL)
 		return NULL;
 	p = buff;
 
 	buffSize = *(unsigned int*)p;
 
-	/*while (*p != NULL) {
-		buffSize = **(unsigned int**)p;
-
-		p = *p;*/
-
-		if ((buffSize >> 1) >= size && ((buffSize & 1) == 0) && (buffSize != 0) ) {
 
 
-			if ( (int)((int)(buffSize >> 1) - (int)size -  (int)sizeof(unsigned int)) <= (int)(2 * sizeof(void*) + 2 * sizeof(unsigned int))) { //zmensena free bunka nie je dost velka
+	if ((buffSize >> 1) >= size && ((buffSize & 1) == 0) && (buffSize != 0) ) {
 
-				size = buffSize >> 1;
-			}
 
-			*(unsigned int*)p = (size << 1) | 1; //size begin
-			p = (char*)p + sizeof(unsigned int); //skok na zaciatok payloadu
-			buff = p;
-			prev = *p; //ukazuje na prev pointer -> buduci zaciatok payloadu
-			*p = NULL; //odstranenie pointrov
-			next = *(++p); 
-			*(p--) = NULL;
-			p = (char*)p + sizeof(char) * size; //skok na koniec payloadu
-			*(unsigned int*)p = (size << 1) | 1; //size end
+		if ( (int)((int)(buffSize >> 1) - (int)size -  (int)sizeof(unsigned int)) <= (int)(2 * sizeof(void*) + 2 * sizeof(unsigned int))) { //zmensena free bunka nie je dost velka
+
+			size = buffSize >> 1;
+		}
+
+		*(unsigned int*)p = (size << 1) | 1; //size begin
+		p = (char*)p + sizeof(unsigned int); //skok na zaciatok payloadu
+		buff = p;
+		prev = *p; //ukazuje na prev pointer -> buduci zaciatok payloadu
+		*p = NULL; //odstranenie pointrov
+		next = *(++p); 
+		*(p--) = NULL;
+		p = (char*)p + sizeof(char) * size; //skok na koniec payloadu
+		*(unsigned int*)p = (size << 1) | 1; //size end
+		
+
+		
+		p = (char*)p + sizeof(unsigned int);
+		if ((buffSize >> 1) != size) {
+
+			*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
+			p = (char*)p + ((buffSize >> 1) - size - 1 * sizeof(unsigned int) );
+			*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
+			p = (char*)p - ((buffSize >> 1) - size - 1 * sizeof(unsigned int));
 			
-
 			
-			p = (char*)p + sizeof(unsigned int);
-			if ((buffSize >> 1) != size) {
-
-				*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
-				p = (char*)p + ((buffSize >> 1) - size - 1 * sizeof(unsigned int) );
-				*(unsigned int*)p = ((buffSize >> 1) - size - 2 * sizeof(unsigned int) << 1); //velkost novej free bunky
-				p = (char*)p - ((buffSize >> 1) - size - 1 * sizeof(unsigned int));
-				
-				
-				if (prev == NULL) { //prev == NULL
-					*memP = p; //. zaciatok ukazuje na nove pole
-					p = (char*)p + sizeof(unsigned int);
-					*p = NULL; //nove prev
-				}
-				else {
-					buff = p;
-					p = (char*)p + sizeof(unsigned int); //ukazuje na prev novej free bunky
-					*p = prev; 
-					p = *p;
-					p = (char*)p + sizeof(unsigned int) + sizeof(void*);
-
-					*p = buff;
-					p = *p;
-					p = (char*)p + sizeof(unsigned int); //ukazuje na prev novej free bunky
-					//
-
-				}
-				p = p + 1; //mal by ukazovat na next novej free bunky
-
-				if (next == NULL) {
-					*p = NULL;
-				}
-				else {
-
-					buff = (char*)p - sizeof(void*) - sizeof(unsigned int);
-					*p = next;
-					p = *p;
-					p = (char*)p + sizeof(unsigned int); // ukazuje na prev NewFree
-
-					*p = buff; //na adresu kde ukazuje p sa ulozila adresa kde ukazuje buff
-
-					
-				}
-				
+			if (prev == NULL) { //prev == NULL
+				*memP = p; //. zaciatok ukazuje na nove pole
+				p = (char*)p + sizeof(unsigned int);
+				*p = NULL; //nove prev
 			}
 			else {
-				if (prev == NULL && next == NULL) {
-					*memP = NULL;
-				}
-				else if (prev == NULL && next != NULL){
-					*memP = next;
-					p = (char*)next + sizeof(unsigned int); //?
-					*p = NULL;
-				}
-				else if (prev != NULL && next == NULL) {
-					p = (char*)prev + sizeof(unsigned int) + sizeof(void*);
-					*p = NULL;
-				}
-				else {
-					p = (char*)prev + sizeof(unsigned int) + sizeof(void*);
-					*p = next;
-					p = (char*)next + sizeof(unsigned int);
-					*p = prev;
-				}
+				buff = p;
+				p = (char*)p + sizeof(unsigned int); //ukazuje na prev novej free bunky
+				*p = prev; 
+				p = *p;
+				p = (char*)p + sizeof(unsigned int) + sizeof(void*);
+
+				*p = buff;
+				p = *p;
+				p = (char*)p + sizeof(unsigned int); //ukazuje na prev novej free bunky
+				//
+
+			}
+			p = p + 1; //mal by ukazovat na next novej free bunky
+
+			if (next == NULL) {
+				*p = NULL;
+			}
+			else {
+
+				buff = (char*)p - sizeof(void*) - sizeof(unsigned int);
+				*p = next;
+				p = *p;
+				p = (char*)p + sizeof(unsigned int); // ukazuje na prev NewFree
+
+				*p = buff; //na adresu kde ukazuje p sa ulozila adresa kde ukazuje buff
+
+				
 			}
 			
-			return buff = (char*)buff;
-						
-			
+		}
+		else {
+			if (prev == NULL && next == NULL) {
+				*memP = NULL;
+			}
+			else if (prev == NULL && next != NULL){
+				*memP = next;
+				p = (char*)next + sizeof(unsigned int); 
+				*p = NULL;
+			}
+			else if (prev != NULL && next == NULL) {
+				p = (char*)prev + sizeof(unsigned int) + sizeof(void*);
+				*p = NULL;
+			}
+			else {
+				p = (char*)prev + sizeof(unsigned int) + sizeof(void*);
+				*p = next;
+				p = (char*)next + sizeof(unsigned int);
+				*p = prev;
+			}
 		}
 		
-		//p = (char*)p + sizeof(void*) + sizeof(unsigned int);
-
-	//}
-//	printf("nedostatok miesta!\n");
+		return buff = (char*)buff;
+					
+		
+	}
+		
+	
 	return NULL; //TODO kukni co ma vratit
 }
 
@@ -482,7 +472,6 @@ void memory_init(void* ptr, unsigned int size) {
 	*p = (void**)ptr + 1; // pointer to pointer ptr[sizeof(void*)]
 
 
-	//TODO zmenit buffsize na realnu velkost - asi done? 
 	p = p + 1;
 	unsigned int BuffSize = ((size - sizeof(void*) - 3*sizeof(unsigned int) ) << 1); //velkost s bitom na urcenie zaplnenia
 
@@ -502,12 +491,7 @@ void memory_init(void* ptr, unsigned int size) {
 	*p = NULL; //next
 
 
-	//toto som tu asi zabudol kvoli niecomu
-	/*p = ptr;
-	BuffSize = **(unsigned int**)p;*/
-
 	memP = ptr;
-
 }
 
 

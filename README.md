@@ -11,10 +11,10 @@ Otazky na cviko:
 * ~~aka je minimalna a max velkost memory pola - nie je~~
 
 Vyriesit:
-* kontrola ze som za alokovanou pamatou - stasi pre hlavnu pamat
-* kontrola ci okolo uvolnovaneho pola je volne miesto
-* ako ulozit pointer na zadanej adrese - DONE
-* ako riesit pole < 16
+* ~~kontrola ze som za alokovanou pamatou - stasi pre hlavnu pamat~~
+* ~~kontrola ci okolo uvolnovaneho pola je volne miesto~~
+* ~~ako ulozit pointer na zadanej adrese - DONE~~
+* ~~ako riesit pole < 16 - Done~~
 
 Mozno vyuzi:
 *	//**(char**)p = 204;
@@ -29,5 +29,5 @@ TODO
 	* testovacie scenare
 	* statistiky
 	* zlozitost (casova/pamatova)
-* best fit
+* ~~best fit~~
 * pri free P&&N ked sa uvolni cela pamat, memP a nextP su zle. Pri strednych testoch to je vidno
