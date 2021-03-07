@@ -21,28 +21,59 @@ int main() {
 	char region[100000];
 	char* pointer[10000];
 
+	int i,j;
+
+	for (j = 50; j <= 200; j *= 2) {
+
+		for (i = 8; i <= 24; i++) {
+			test1(region, pointer, j, i);
+		}
+		test2(region, pointer, j, 8, 24);
+	}
+
+	test2(region, pointer, 10000, 500,5000);
+	test2(region, pointer, 10000, 500, 5000);
+	test2(region, pointer, 10000, 500, 5000);
+	test2(region, pointer, 10000, 500, 5000);
+	test2(region, pointer, 10000, 500, 5000);
+
+	test2(region, pointer, 100000, 8, 50000);
+	test2(region, pointer, 100000, 8, 50000);
+	test2(region, pointer, 100000, 8, 50000);
+	test2(region, pointer, 100000, 8, 50000);
+	test2(region, pointer, 100000, 8, 50000);
+	test2(region, pointer, 100000, 8, 50000);
 	
 
-	/*test1(region, pointer, 1000, 21);
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
+	z1_testovac(region, pointer, 8, 24, 50, 100, 1);
 
-	test2(region, pointer, 1000, 8, 24);*/
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
+	z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
 
-	//z1_testovac(region, pointer, 8, 24, 50, 100, 1);
-
-
-	//z1_testovac(region, pointer, 8, 100, 1000, 2000, 0);
-
-
-	//z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
+	z1_testovac(region, pointer, 8, 35000, 50000, 99000, 0);
 
 
 	return 0;
 }
 
 
+
+
 void test2(char* region, char** pointer, unsigned int initSize, unsigned int minBlockSize, unsigned int maxBlockSize) {
 	unsigned int allocAll = 0, allocSucces = 0;
-	int i=0, e, randSize, count = 0; ;
+	int i=0, e, randSize, randIndex, count = 0; 
+	char* tempP;
 	
 	memory_init(region, initSize);
 
@@ -54,8 +85,22 @@ void test2(char* region, char** pointer, unsigned int initSize, unsigned int min
 		}
 		allocAll += randSize;
 	}
+
+	for (e = 0; e < (count ); e++) {
+		randIndex = (rand() % (count - e));
+		if (memory_free(pointer[randIndex]) == 1) {
+			printf("free error pointer %d\n", randIndex);
+		}
+
+		tempP = pointer[count - e - 1];
+		pointer[count - e - 1] = pointer[randIndex];
+		pointer[randIndex] = tempP;
+
+	}
+
+
 	memset(region, 0, initSize); 
-	printf("%.2f%% bytov \n", (float)allocSucces / allocAll * 100);
+	printf("memory size: %u bytov, alokovanych: %.2f%% bytov \n", initSize, (float)allocSucces / allocAll * 100);
 }
 
 void test1(char* region, char** pointer, unsigned int initSize, unsigned int blockSize) {
@@ -65,7 +110,7 @@ void test1(char* region, char** pointer, unsigned int initSize, unsigned int blo
 	memory_init(region, initSize);
 
 
-	for (i = 0; i < (initSize / blockSize / 2); i++) {
+	for (i = 0; i < (initSize / blockSize ); i++) {
 		if ( (pointer[i] = memory_alloc(blockSize))!= NULL ) {
 			allocSucces += blockSize;
 			count++;
@@ -73,7 +118,7 @@ void test1(char* region, char** pointer, unsigned int initSize, unsigned int blo
 		allocAll += blockSize;
 	}
 
-	for (e = 0; e < (count / 2); e++) {
+	for (e = 0; e < (count ); e++) {
 		randIndex = (rand() % (count - e ));
 		if (memory_free(pointer[randIndex]) == 1 ) {
 			printf("free error pointer %d\n", randIndex);
@@ -85,17 +130,9 @@ void test1(char* region, char** pointer, unsigned int initSize, unsigned int blo
 
 	}
 
-	for (i = e; i < (initSize / blockSize ); i++) {
-		if ((pointer[i] = memory_alloc(blockSize)) != NULL) {
-			allocSucces += blockSize;
-			count++;
-		}
-		allocAll += blockSize;
-	}
-
 
 	memset(region, 0, initSize);
-	printf("%.2f%% bytov \n", (float)allocSucces / allocAll * 100);
+	printf("memory size: %u bytov, alokovanych: %.2f%% bytov \n",initSize, (float)allocSucces / allocAll * 100);
 }
 
 
